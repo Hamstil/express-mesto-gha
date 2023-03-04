@@ -42,7 +42,11 @@ exports.deleteCard = async (req, res) => {
     card.remove();
     res.status(200).send({ message: 'Карточка успешно удалена' });
   } catch (err) {
-    res.status(500).send({ message: 'Произошла ошибка' });
+    if (err.name === 'CastError') {
+      res.status(BadRequest).send({ message: 'Переданны некорректные данные' });
+    } else {
+      res.status(500).send({ message: 'Произошла ошибка' });
+    }
   }
 };
 
@@ -60,7 +64,11 @@ exports.getLike = async (req, res) => {
       res.status(NotFound).send({ message: 'Карточка не найдена' });
     }
   } catch (err) {
-    res.status(500).send({ message: 'Произошла ошибка' });
+    if (err.name === 'CastError') {
+      res.status(BadRequest).send({ message: 'Переданны некорректные данные' });
+    } else {
+      res.status(500).send({ message: 'Произошла ошибка' });
+    }
   }
 };
 
@@ -78,6 +86,10 @@ exports.deleteLike = async (req, res) => {
       res.status(NotFound).send({ message: 'Карточка не найдена' });
     }
   } catch (err) {
-    res.status(500).send({ message: 'Произошла ошибка' });
+    if (err.name === 'CastError') {
+      res.status(BadRequest).send({ message: 'Переданны некорректные данные' });
+    } else {
+      res.status(500).send({ message: 'Произошла ошибка' });
+    }
   }
 };

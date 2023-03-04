@@ -16,10 +16,14 @@ exports.getUsersById = async (req, res) => {
     if (user) {
       res.status(200).send(user);
     } else {
-      res.status(NotFound).send({ message: ' Такого пользователя нет' });
+      res.status(NotFound).send({ message: 'Такого пользователя нет' });
     }
   } catch (err) {
-    res.status(500).send({ message: 'Произошла ошибка' });
+    if (err.name === 'CastError') {
+      res.status(BadRequest).send({ message: 'Переданны некорректные данные' });
+    } else {
+      res.status(500).send({ message: 'Произошла ошибка' });
+    }
   }
 };
 
@@ -43,7 +47,7 @@ exports.createUser = async (req, res) => {
     const user = await userSchema.create(req.body);
     res.status(201).send(user);
   } catch (err) {
-    if (err.errors.name || err.errors.about) {
+    if (err.errors.name || err.errors.about || err.errors.avatar) {
       const { message } = err;
       res.status(BadRequest).send({ message });
     } else {
