@@ -12,8 +12,6 @@ exports.getCards = async (req, res) => {
     const cards = await cardSchema.find({}).populate(['owner', 'likes']);
     if (cards) {
       res.status(HTTP_STATUS_OK).send(cards);
-    } else {
-      res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Карточек нет' });
     }
   } catch (err) {
     res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });

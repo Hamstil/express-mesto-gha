@@ -12,8 +12,6 @@ exports.getUsers = async (req, res) => {
     const users = await userSchema.find({});
     if (users) {
       res.status(HTTP_STATUS_OK).send(users);
-    } else {
-      res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Пользователей нет' });
     }
   } catch (err) {
     res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
