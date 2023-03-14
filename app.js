@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const express = require('express');
+const helmet = require('helmet');
+const cors = require('cors');
 
 const { routes } = require('./routes');
 
@@ -7,18 +9,13 @@ const app = express();
 
 const { PORT = 3000 } = process.env;
 
+app.use(express.json());
+app.use(helmet());
+app.use(cors());
+
 // Кастомный мидлвер - выводит в консоль метод и путь
 app.use((req, res, next) => {
   console.log(req.method, req.path);
-  next();
-});
-
-// Обогащает запросы объектом user
-app.use((req, res, next) => {
-  req.user = {
-    _id: '63fc908143b30f8180743a21',
-  };
-
   next();
 });
 

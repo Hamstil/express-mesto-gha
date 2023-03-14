@@ -50,21 +50,6 @@ exports.getCurrentUser = async (req, res) => {
   }
 };
 
-// Создание пользователя
-exports.createUser = async (req, res) => {
-  try {
-    const user = await userSchema.create(req.body);
-    res.status(HTTP_STATUS_OK).send(user);
-  } catch (err) {
-    if (err.name === 'ValidationError') {
-      const { message } = err;
-      res.status(HTTP_STATUS_BAD_REQUEST).send({ message });
-    } else {
-      res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
-    }
-  }
-};
-
 // Обновление юзера (имя, описание)
 exports.updateUser = async (req, res) => {
   const { name, about } = req.body;
