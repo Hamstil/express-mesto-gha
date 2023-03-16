@@ -1,16 +1,13 @@
-const {
-  HTTP_STATUS_OK,
-  HTTP_STATUS_BAD_REQUEST,
-  HTTP_STATUS_INTERNAL_SERVER_ERROR,
-  HTTP_STATUS_UNAUTHORIZED,
-  HTTP_STATUS_CONFLICT,
-} = require('http2').constants;
+const { HTTP_STATUS_OK } = require('http2').constants;
 const bcrypt = require('bcrypt');
 const jsonwebtoken = require('jsonwebtoken');
 const { userSchema } = require('../models/user');
+const BadRequest = require('../errors/BadRequest'); // 400
+const ConflictError = require('../errors/ConflictError'); // 409
+const AuthError = require('../errors/AuthError'); // 401
 
 // Регистрация пользователя
-exports.createUser = async (req, res) => {
+exports.createUser = async (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -23,33 +20,33 @@ exports.createUser = async (req, res) => {
     res.status(HTTP_STATUS_OK).send(user);
   } catch (err) {
     if (err.code === 11000) {
-      res.status(HTTP_STATUS_CONFLICT).send({ message: 'Пользователь с таким email уже есть' });
+      next(new ConflictError('Пользователь с таким email уже есть'));
     } else if (err.name === 'ValidationError') {
       const { message } = err;
-      res.status(HTTP_STATUS_BAD_REQUEST).send({ message });
+      next(new BadRequest(`Не валидные данные ${message}`));
     } else {
-      res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
+      next(err);
     }
   }
 };
 
 // Вход пользователя
-exports.login = async (req, res) => {
+exports.login = async (req, res, next) => {
   const { email, password } = req.body;
   try {
     const user = await userSchema.findOne({ email }).select('+password');
     if (!user) {
-      res.status(HTTP_STATUS_UNAUTHORIZED).send({ message: 'Такого пользователя нет' });
+      next(new AuthError('Такого пользователя нет'));
     } else {
       const matched = await bcrypt.compare(password, user.password);
       if (matched) {
         const jwt = jsonwebtoken.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
         res.status(HTTP_STATUS_OK).send({ user, jwt });
       } else {
-        res.status(HTTP_STATUS_UNAUTHORIZED).send({ message: 'Неверая почти или пароль' });
+        next(new AuthError('Неверая почти или пароль'));
       }
     }
   } catch (err) {
-    res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
+    next(err);
   }
 };

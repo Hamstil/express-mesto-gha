@@ -2,8 +2,10 @@ const mongoose = require('mongoose');
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
+const { errors } = require('celebrate');
 
 const { routes } = require('./routes');
+const setErrors = require('./middlewares/setErrors');
 
 const app = express();
 
@@ -20,6 +22,8 @@ app.use((req, res, next) => {
 });
 
 app.use(routes);
+app.use(errors());
+app.use(setErrors);
 
 async function main() {
   await mongoose.connect('mongodb://localhost:27017/mestodb', {

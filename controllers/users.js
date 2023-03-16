@@ -1,57 +1,54 @@
-const {
-  HTTP_STATUS_OK,
-  HTTP_STATUS_BAD_REQUEST,
-  HTTP_STATUS_NOT_FOUND,
-  HTTP_STATUS_INTERNAL_SERVER_ERROR,
-} = require('http2').constants;
+const { HTTP_STATUS_OK } = require('http2').constants;
 const { userSchema } = require('../models/user');
+const BadRequest = require('../errors/BadRequest'); // 400
+const NotFound = require('../errors/NotFound'); // 404
 
 // Получить всех пользователей
-exports.getUsers = async (req, res) => {
+exports.getUsers = async (req, res, next) => {
   try {
     const users = await userSchema.find({});
     if (users) {
       res.status(HTTP_STATUS_OK).send(users);
     }
   } catch (err) {
-    res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
+    next(err);
   }
 };
 
 // Получить пользователя по id
-exports.getUsersById = async (req, res) => {
+exports.getUsersById = async (req, res, next) => {
   try {
     const user = await userSchema.findById(req.params.userId);
     if (user) {
       res.status(HTTP_STATUS_OK).send(user);
     } else {
-      res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Такого пользователя нет' });
+      next(new NotFound('Такого пользователя нет'));
     }
   } catch (err) {
     if (err.name === 'CastError') {
-      res.status(HTTP_STATUS_BAD_REQUEST).send({ message: 'Переданны некорректные данные' });
+      next(new BadRequest('Переданны некорректные данные'));
     } else {
-      res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
+      next(err);
     }
   }
 };
 
 // Получить текущего пользователя
-exports.getCurrentUser = async (req, res) => {
+exports.getCurrentUser = async (req, res, next) => {
   try {
     const user = await userSchema.findById(req.user._id);
     if (user) {
       res.status(HTTP_STATUS_OK).send(user);
     } else {
-      res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Нет пользователя' });
+      next(new NotFound('Нет пользователя'));
     }
   } catch (err) {
-    res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
+    next(err);
   }
 };
 
 // Обновление юзера (имя, описание)
-exports.updateUser = async (req, res) => {
+exports.updateUser = async (req, res, next) => {
   const { name, about } = req.body;
   try {
     const user = await userSchema.findByIdAndUpdate(
@@ -60,21 +57,21 @@ exports.updateUser = async (req, res) => {
       { new: true, runValidators: true },
     );
     if (!user) {
-      res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Пользователь не найден' });
+      next(new NotFound('Пользователь не найден'));
     }
     res.status(HTTP_STATUS_OK).send(user);
   } catch (err) {
     if (err.name === 'ValidationError') {
       const { message } = err;
-      res.status(HTTP_STATUS_BAD_REQUEST).send({ message });
+      next(new BadRequest(`Не валидные данные ${message}`));
     } else {
-      res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
+      next(err);
     }
   }
 };
 
 // Обновление юзера (аватар)
-exports.updateAvatar = async (req, res) => {
+exports.updateAvatar = async (req, res, next) => {
   const { avatar } = req.body;
   try {
     const user = await userSchema.findByIdAndUpdate(
@@ -83,15 +80,15 @@ exports.updateAvatar = async (req, res) => {
       { new: true, runValidators: true },
     );
     if (!user) {
-      res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Пользователь не найден' });
+      next(new NotFound('Пользователь не найден'));
     }
     res.status(HTTP_STATUS_OK).send(user);
   } catch (err) {
     if (err.name === 'ValidationError') {
       const { message } = err;
-      res.status(HTTP_STATUS_BAD_REQUEST).send({ message });
+      next(new BadRequest(`Не валидные данные ${message}`));
     } else {
-      res.status(HTTP_STATUS_INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
+      next(err);
     }
   }
 };

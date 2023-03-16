@@ -1,0 +1,74 @@
+const { celebrate, Joi } = require('celebrate');
+
+const { regexUrl, regexId } = require('../utils/constants');
+const BadRequest = require('../errors/BadRequest');
+
+// Метод валидации url
+const validationUrl = (url) => {
+  if (regexUrl.test(url)) {
+    return url;
+  } throw new BadRequest('Не корректный Url');
+};
+
+// Метод валидации id
+const validationId = (id) => {
+  if (regexId.test(id)) {
+    return id;
+  } throw new BadRequest('Не корректный id');
+};
+
+//  Регистрация
+module.exports.validationCreateUser = celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(30),
+    avatar: Joi.string().custom(validationUrl),
+    email: Joi.string().required().email(),
+    password: Joi.string().required().min(8).message('Пароль должен быть минимим 8 символов'),
+  }),
+});
+
+// Логин
+module.exports.validationLogin = celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required(),
+  }),
+});
+
+// Обновление данных юзера
+module.exports.validationUpdateUser = celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().required().min(2).max(30),
+    about: Joi.string().required().min(2).max(30),
+  }),
+});
+
+// Обновление аватара
+module.exports.validationUpdateAvatar = celebrate({
+  body: Joi.object().keys({
+    avatar: Joi.string().required().custom(validationUrl),
+  }),
+});
+
+// Поиск юзера по id
+module.exports.validationUserId = celebrate({
+  body: Joi.object().keys({
+    userId: Joi.string().required().custom(validationId),
+  }),
+});
+
+// Создание карточки
+module.exports.validationCreatCard = celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().required().min(2).max(30),
+    link: Joi.string().required().custom(validationUrl),
+  }),
+});
+
+// Поиск карточки по id
+module.exports.validationCardById = celebrate({
+  params: Joi.object().keys({
+    cardId: Joi.string().required().custom(validationId),
+  }),
+});

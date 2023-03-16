@@ -1,4 +1,3 @@
-const { HTTP_STATUS_NOT_FOUND } = require('http2').constants;
 const express = require('express');
 
 const routes = express.Router();
@@ -6,17 +5,18 @@ const { createUser, login } = require('../controllers/auth');
 const { auth } = require('../middlewares/auth');
 const { cardRoutes } = require('./cards');
 const { userRoutes } = require('./users');
+const NotFound = require('../errors/NotFound');
+const { validationCreateUser, validationLogin } = require('../middlewares/validation');
 
-routes.post('/signin', login);
-routes.post('/signup', createUser);
+routes.post('/signin', validationLogin, login);
+routes.post('/signup', validationCreateUser, createUser);
 
 routes.use('/users', auth, userRoutes);
 routes.use('/cards', auth, cardRoutes);
 
 // Ошибка на остальные роуты
 routes.use((req, res, next) => {
-  res.status(HTTP_STATUS_NOT_FOUND).send({ message: 'Такой страницы нет' });
-  next();
+  next(new NotFound('Такой страницы нет.'));
 });
 
 exports.routes = routes;
