@@ -43,7 +43,11 @@ exports.getCurrentUser = async (req, res, next) => {
       next(new NotFound('Нет пользователя'));
     }
   } catch (err) {
-    next(err);
+    if (err.name === 'CastError') {
+      next(new BadRequest('Переданы некорректные данные'));
+    } else if (err.message === 'NotFound') {
+      next(new NotFound('Нет пользователя'));
+    } next(err);
   }
 };
 
@@ -61,7 +65,7 @@ exports.updateUser = async (req, res, next) => {
     }
     res.status(HTTP_STATUS_OK).send(user);
   } catch (err) {
-    if (err.name === 'ValidationError') {
+    if (err.name === 'ValidationError' || err.name === 'CastError') {
       const { message } = err;
       next(new BadRequest(`Не валидные данные ${message}`));
     } else {
@@ -84,7 +88,7 @@ exports.updateAvatar = async (req, res, next) => {
     }
     res.status(HTTP_STATUS_OK).send(user);
   } catch (err) {
-    if (err.name === 'ValidationError') {
+    if (err.name === 'ValidationError' || err.name === 'CastError') {
       const { message } = err;
       next(new BadRequest(`Не валидные данные ${message}`));
     } else {

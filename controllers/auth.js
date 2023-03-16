@@ -17,7 +17,12 @@ exports.createUser = async (req, res, next) => {
     const user = await userSchema.create({
       name, about, avatar, email, password: hash,
     });
-    res.status(HTTP_STATUS_OK).send(user);
+    res.status(HTTP_STATUS_OK).send({
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      email: user.email,
+    });
   } catch (err) {
     if (err.code === 11000) {
       next(new ConflictError('Пользователь с таким email уже есть'));
