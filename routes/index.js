@@ -11,8 +11,9 @@ const { validationCreateUser, validationLogin } = require('../middlewares/valida
 routes.post('/signin', validationLogin, login);
 routes.post('/signup', validationCreateUser, createUser);
 
-routes.use('/users', auth, userRoutes);
-routes.use('/cards', auth, cardRoutes);
+routes.use(auth);
+routes.use('/users', userRoutes);
+routes.use('/cards', cardRoutes);
 
 // Ошибка на остальные роуты
 routes.use((req, res, next) => {

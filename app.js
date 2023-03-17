@@ -15,12 +15,6 @@ app.use(express.json());
 app.use(helmet());
 app.use(cors());
 
-// Кастомный мидлвер - выводит в консоль метод и путь
-app.use((req, res, next) => {
-  console.log(req.method, req.path);
-  next();
-});
-
 app.use(routes);
 app.use(errors());
 app.use(setErrors);

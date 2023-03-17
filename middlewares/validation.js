@@ -1,6 +1,6 @@
 const { celebrate, Joi } = require('celebrate');
 
-const { regexUrl, regexId } = require('../utils/constants');
+const { regexUrl } = require('../utils/constants');
 const BadRequest = require('../errors/BadRequest');
 
 // Метод валидации url
@@ -8,13 +8,6 @@ const validationUrl = (url) => {
   if (regexUrl.test(url)) {
     return url;
   } throw new BadRequest('Не корректный Url');
-};
-
-// Метод валидации id
-const validationId = (id) => {
-  if (regexId.test(id)) {
-    return id;
-  } throw new BadRequest('Не корректный id');
 };
 
 //  Регистрация
@@ -54,7 +47,7 @@ module.exports.validationUpdateAvatar = celebrate({
 // Поиск юзера по id
 module.exports.validationUserId = celebrate({
   params: Joi.object().keys({
-    userId: Joi.string().required().custom(validationId),
+    userId: Joi.string().required().hex().length(24),
   }),
 });
 
@@ -69,6 +62,6 @@ module.exports.validationCreatCard = celebrate({
 // Поиск карточки по id
 module.exports.validationCardById = celebrate({
   params: Joi.object().keys({
-    cardId: Joi.string().required().custom(validationId),
+    cardId: Joi.string().required().hex().length(24),
   }),
 });

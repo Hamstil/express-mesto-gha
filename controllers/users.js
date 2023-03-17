@@ -7,9 +7,7 @@ const NotFound = require('../errors/NotFound'); // 404
 exports.getUsers = async (req, res, next) => {
   try {
     const users = await userSchema.find({});
-    if (users) {
-      res.status(HTTP_STATUS_OK).send(users);
-    }
+    res.status(HTTP_STATUS_OK).send(users);
   } catch (err) {
     next(err);
   }
@@ -45,9 +43,7 @@ exports.getCurrentUser = async (req, res, next) => {
   } catch (err) {
     if (err.name === 'CastError') {
       next(new BadRequest('Переданы некорректные данные'));
-    } else if (err.message === 'NotFound') {
-      next(new NotFound('Нет пользователя'));
-    } next(err);
+    } else next(err);
   }
 };
 
